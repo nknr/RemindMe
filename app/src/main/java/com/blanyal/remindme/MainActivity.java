@@ -19,10 +19,10 @@ package com.blanyal.remindme;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -85,10 +85,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Create recycler view
-        mList.setLayoutManager(getLayoutManager());
+        mList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         registerForContextMenu(mList);
         mAdapter = new SimpleAdapter();
-        mAdapter.setItemCount(getDefaultItemCount());
+        mAdapter.setItemCount();
         mList.setAdapter(mAdapter);
 
         // Setup toolbar
@@ -115,16 +115,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Multi select items in recycler view
-    private android.support.v7.view.ActionMode.Callback mDeleteMode = new ModalMultiSelectorCallback(mMultiSelector) {
+    private androidx.appcompat.view.ActionMode.Callback mDeleteMode = new ModalMultiSelectorCallback(mMultiSelector) {
 
         @Override
-        public boolean onCreateActionMode(android.support.v7.view.ActionMode actionMode, Menu menu) {
+        public boolean onCreateActionMode(androidx.appcompat.view.ActionMode actionMode, Menu menu) {
             getMenuInflater().inflate(R.menu.menu_add_reminder, menu);
             return true;
         }
 
         @Override
-        public boolean onActionItemClicked(android.support.v7.view.ActionMode actionMode, MenuItem menuItem) {
+        public boolean onActionItemClicked(androidx.appcompat.view.ActionMode actionMode, MenuItem menuItem) {
             switch (menuItem.getItemId()) {
 
                 // On clicking discard reminders
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                     mMultiSelector.clearSelections();
                     // Recreate the recycler items
                     // This is done to remap the item and reminder ids
-                    mAdapter.onDeleteItem(getDefaultItemCount());
+                    mAdapter.onDeleteItem();
 
                     // Display toast to confirm delete
                     Toast.makeText(getApplicationContext(),
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mAdapter.setItemCount(getDefaultItemCount());
+        mAdapter.setItemCount();
     }
 
     // Recreate recycler view
@@ -217,17 +217,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mNoReminderView.setVisibility(View.GONE);
         }
-
-        mAdapter.setItemCount(getDefaultItemCount());
-    }
-
-    // Layout manager for recycler view
-    protected RecyclerView.LayoutManager getLayoutManager() {
-        return new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-    }
-
-    protected int getDefaultItemCount() {
-        return 100;
+        mAdapter.setItemCount();
     }
 
     // Create menu
@@ -261,15 +251,15 @@ public class MainActivity extends AppCompatActivity {
             mItems = new ArrayList<>();
         }
 
-        public void setItemCount(int count) {
+        public void setItemCount() {
             mItems.clear();
-            mItems.addAll(generateData(count));
+            mItems.addAll(generateData());
             notifyDataSetChanged();
         }
 
-        public void onDeleteItem(int count) {
+        public void onDeleteItem() {
             mItems.clear();
-            mItems.addAll(generateData(count));
+            mItems.addAll(generateData());
         }
 
         public void removeItemSelected(int selected) {
@@ -372,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
                     selectReminder(mReminderClickID);
 
                 } else if(mMultiSelector.getSelectedPositions().isEmpty()){
-                    mAdapter.setItemCount(getDefaultItemCount());
+                    mAdapter.setItemCount();
                 }
             }
 
@@ -426,13 +416,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // Generate random test data
-        public  ReminderItem generateDummyData() {
-            return new ReminderItem("1", "2", "3", "4", "5", "6");
-        }
-
         // Generate real data for each item
-        public List<ReminderItem> generateData(int count) {
+        public List<ReminderItem> generateData() {
             ArrayList<SimpleAdapter.ReminderItem> items = new ArrayList<>();
 
             // Get all reminders from the database
