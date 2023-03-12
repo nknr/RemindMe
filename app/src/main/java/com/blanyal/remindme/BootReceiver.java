@@ -27,21 +27,6 @@ import java.util.List;
 
 public class BootReceiver extends BroadcastReceiver {
 
-    private String mTitle;
-    private String mTime;
-    private String mDate;
-    private String mRepeatNo;
-    private String mRepeatType;
-    private String mActive;
-    private String mRepeat;
-    private String[] mDateSplit;
-    private String[] mTimeSplit;
-    private int mYear, mMonth, mHour, mMinute, mDay, mReceivedID;
-    private long mRepeatTime;
-
-    private Calendar mCalendar;
-    private AlarmReceiver mAlarmReceiver;
-
     // Constant values in milliseconds
     private static final long milMinute = 60000L;
     private static final long milHour = 3600000L;
@@ -55,28 +40,28 @@ public class BootReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
 
             ReminderDatabase rb = new ReminderDatabase(context);
-            mCalendar = Calendar.getInstance();
-            mAlarmReceiver = new AlarmReceiver();
+            Calendar mCalendar = Calendar.getInstance();
+            AlarmReceiver mAlarmReceiver = new AlarmReceiver();
 
             List<Reminder> reminders = rb.getAllReminders();
 
             for (Reminder rm : reminders) {
-                mReceivedID = rm.getID();
-                mRepeat = rm.getRepeat();
-                mRepeatNo = rm.getRepeatNo();
-                mRepeatType = rm.getRepeatType();
-                mActive = rm.getActive();
-                mDate = rm.getDate();
-                mTime = rm.getTime();
+                int mReceivedID = rm.getID();
+                String mRepeat = rm.getRepeat();
+                String mRepeatNo = rm.getRepeatNo();
+                String mRepeatType = rm.getRepeatType();
+                String mActive = rm.getActive();
+                String mDate = rm.getDate();
+                String mTime = rm.getTime();
 
-                mDateSplit = mDate.split("/");
-                mTimeSplit = mTime.split(":");
+                String[] mDateSplit = mDate.split("/");
+                String[] mTimeSplit = mTime.split(":");
 
-                mDay = Integer.parseInt(mDateSplit[0]);
-                mMonth = Integer.parseInt(mDateSplit[1]);
-                mYear = Integer.parseInt(mDateSplit[2]);
-                mHour = Integer.parseInt(mTimeSplit[0]);
-                mMinute = Integer.parseInt(mTimeSplit[1]);
+                int mDay = Integer.parseInt(mDateSplit[0]);
+                int mMonth = Integer.parseInt(mDateSplit[1]);
+                int mYear = Integer.parseInt(mDateSplit[2]);
+                int mHour = Integer.parseInt(mTimeSplit[0]);
+                int mMinute = Integer.parseInt(mTimeSplit[1]);
 
                 mCalendar.set(Calendar.MONTH, --mMonth);
                 mCalendar.set(Calendar.YEAR, mYear);
@@ -89,16 +74,24 @@ public class BootReceiver extends BroadcastReceiver {
                 // mAlarmReceiver.cancelAlarm(context, mReceivedID);
 
                 // Check repeat type
-                if (mRepeatType.equals("Minute")) {
-                    mRepeatTime = Integer.parseInt(mRepeatNo) * milMinute;
-                } else if (mRepeatType.equals("Hour")) {
-                    mRepeatTime = Integer.parseInt(mRepeatNo) * milHour;
-                } else if (mRepeatType.equals("Day")) {
-                    mRepeatTime = Integer.parseInt(mRepeatNo) * milDay;
-                } else if (mRepeatType.equals("Week")) {
-                    mRepeatTime = Integer.parseInt(mRepeatNo) * milWeek;
-                } else if (mRepeatType.equals("Month")) {
-                    mRepeatTime = Integer.parseInt(mRepeatNo) * milMonth;
+                long mRepeatTime = 0;
+
+                switch (mRepeatType) {
+                    case "Minute":
+                        mRepeatTime = Integer.parseInt(mRepeatNo) * milMinute;
+                        break;
+                    case "Hour":
+                        mRepeatTime = Integer.parseInt(mRepeatNo) * milHour;
+                        break;
+                    case "Day":
+                        mRepeatTime = Integer.parseInt(mRepeatNo) * milDay;
+                        break;
+                    case "Week":
+                        mRepeatTime = Integer.parseInt(mRepeatNo) * milWeek;
+                        break;
+                    case "Month":
+                        mRepeatTime = Integer.parseInt(mRepeatNo) * milMonth;
+                        break;
                 }
 
                 // Create a new notification
